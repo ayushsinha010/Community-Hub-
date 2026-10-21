@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard — AI Hub{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Leaderboard — {{ year_month }}</h1>
+</div>
+
+{% if board %}
+<div class="leaderboard-table">
+  {% for row in board %}
+  <div class="leaderboard-row leaderboard-medal-{{ loop.index if loop.index <= 3 else 'none' }}">
+    <span class="leaderboard-rank">#{{ loop.index }}</span>
+    <span class="leaderboard-name">{{ row.display_name }}</span>
+    <span class="leaderboard-points">{{ row.total_points }} pts</span>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><p>No points earned yet this month - <a href="{{ url_for('submit') }}">share something</a> to get on the board.</p></div>
+{% endif %}
+
+{% if past_winners %}
+<h3>Past Contributors of the Month</h3>
+<div class="leaderboard-table">
+  {% for w in past_winners %}
+  <div class="leaderboard-row">
+    <span class="leaderboard-rank">{{ w.year_month }}</span>
+    <span class="leaderboard-name">{{ w.display_name }}</span>
+    <span class="leaderboard-points">{{ w.total_points }} pts</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ contribution.title }} — AI Hub{% endblock %}
+{% block content %}
+<div class="detail-screen">
+  <a href="{{ url_for('home') }}" class="back-link">&larr; Back to browse</a>
+
+  <div class="contribution-card-top">
+    <span class="type-badge type-badge-{{ contribution.contribution_type }}">{{ contribution_types[contribution.contribution_type] }}</span>
+    {% if contribution.tool %}<span class="tag-chip">{{ contribution.tool }}</span>{% endif %}
+    {% if contribution.category %}<span class="tag-chip">{{ contribution.category }}</span>{% endif %}
+  </div>
+
+  <div class="resume-panel-header">
+    <h1>{{ contribution.title }}</h1>
+    {% if is_author %}
+    <a href="{{ url_for('edit_contribution', contribution_id=contribution.id) }}" class="btn btn-secondary btn-small">Edit</a>
+    {% endif %}
+  </div>
+  <a href="{{ url_for('user_profile', user_id=contribution.author_id) }}" class="author-chip author-chip-lg">
+    <span class="author-avatar">{{ contribution.author_name[0]|upper }}</span>
+    <span>
+      <strong>{{ contribution.author_name }}</strong>{% if contribution.author_department %} &middot; {{ contribution.author_department }}{% endif %}
+      <br><span class="field-hint-small">{{ contribution.author_total_points }} pts overall &middot; posted {{ contribution.created_at }}</span>
+    </span>
+  </a>
+
+  {% if contribution.body %}<div class="contribution-body">{{ contribution.body }}</div>{% endif %}
+
+  {% if contribution.contribution_type == 'poll' %}
+  <div class="poll-widget">
+    <form method="post" action="{{ url_for('vote_poll', contribution_id=contribution.id) }}">
+      {% for opt in poll_options %}
+      {% set pct = ((opt.vote_count / poll_total_votes * 100) if poll_total_votes else 0) %}
+      <button type="submit" name="option_id" value="{{ opt.id }}" class="poll-option {{ 'poll-option-voted' if my_vote == opt.id else '' }}">
+        {% if my_vote %}<span class="poll-option-bar" style="width: {{ pct }}%;"></span>{% endif %}
+        <span class="poll-option-label">{{ opt.option_text }}</span>
+        {% if my_vote %}<span class="poll-option-pct">{{ '%.0f'|format(pct) }}%</span>{% endif %}
+      </button>
+      {% endfor %}
+    </form>
+    <p class="field-hint-small">{{ poll_total_votes }} vote{{ '' if poll_total_votes == 1 else 's' }}{% if my_vote %} &middot; you can change your vote anytime{% endif %}</p>
+  </div>
+  {% else %}
+  <div class="rating-summary">
+    <span class="stars-display stars-display-lg">{{ '★' * (summary.avg_stars|round|int) }}{{ '☆' * (5 - (summary.avg_stars|round|int)) }}</span>
+    <span>{{ '%.1f'|format(summary.avg_stars) }} average &middot; {{ summary.rating_count }} rating{{ '' if summary.rating_count == 1 else 's' }}</span>
+  </div>
+
+  {% if rate_error %}
+  <div class="alert alert-error">{{ rate_error }}</div>
+  {% endif %}
+
+  {% if not is_author %}
+  <form method="post" action="{{ url_for('rate_contribution', contribution_id=contribution.id) }}" class="rate-form">
+    <label class="field-label">{{ 'Update your rating' if my_rating else 'How useful was this?' }}</label>
+    <div class="star-input">
+      {% for i in range(5, 0, -1) %}
+      <input type="radio" id="star{{ i }}" name="stars" value="{{ i }}" {{ 'checked' if my_rating and my_rating.stars == i else '' }} required>
+      <label for="star{{ i }}" title="{{ i }} star{{ '' if i == 1 else 's' }}">★</label>
+      {% endfor %}
+    </div>
+    <input type="text" name="comment" value="{{ my_rating.comment if my_rating else '' }}" placeholder="Optional one-line note" class="rate-comment">
+    <button type="submit" class="btn btn-primary btn-small">{{ 'Update rating' if my_rating else 'Submit rating' }}</button>
+  </form>
+  {% else %}
+  <p class="field-hint-small">You can't rate your own contribution.</p>
+  {% endif %}
+
+  {% if ratings %}
+  <h3>What people said</h3>
+  <div class="ratings-list">
+    {% for r in ratings %}
+    <div class="rating-row">
+      <span class="stars-display">{{ '★' * r.stars }}{{ '☆' * (5 - r.stars) }}</span>
+      <span class="field-hint-small">{{ r.rater_name }}</span>
+      {% if r.comment %}<span class="rating-comment">"{{ r.comment }}"</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endif %}
+
+  <div id="comments" class="comments-section">
+    <h3>Discussion {% if comments %}({{ comments|length }}){% endif %}</h3>
+    <form method="post" action="{{ url_for('comment_on_contribution', contribution_id=contribution.id) }}" class="comment-form">
+      <span class="author-avatar">{{ current_user.display_name[0]|upper }}</span>
+      <input type="text" name="body" placeholder="Ask a question or add a note..." required>
+      <button type="submit" class="btn btn-primary btn-small">Post</button>
+    </form>
+    <div class="comments-list">
+      {% for cm in comments %}
+      <div class="comment-row">
+        <span class="author-avatar">{{ cm.commenter_name[0]|upper }}</span>
+        <div>
+          <span class="thread-author-name">{{ cm.commenter_name }}</span>
+          <span class="field-hint-small">{{ cm.commenter_department or company_name }} &middot; {{ cm.created_at }}</span>
+          <p class="comment-body">{{ cm.body }}</p>
+        </div>
+      </div>
+      {% else %}
+      <p class="field-hint-small">No discussion yet - ask the first question.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My Contributions — AI Hub{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>My contributions</h1>
+</div>
+
+<div class="col-header-actions" style="margin-bottom: 16px;">
+  <div class="alert alert-success" style="margin:0;">This month: {{ stats.month_points }} pts</div>
+  <div class="alert" style="margin:0; background: var(--teal-tint); color: var(--teal-dark);">All time: {{ stats.all_time_points }} pts</div>
+</div>
+
+<div class="contribution-list">
+  {% for c in stats.contributions %}
+  <a href="{{ url_for('contribution_detail', contribution_id=c.id) }}" class="contribution-card">
+    <div class="contribution-card-top">
+      <span class="type-badge type-badge-{{ c.contribution_type }}">{{ contribution_types[c.contribution_type] }}</span>
+      {% if c.tool %}<span class="tag-chip">{{ c.tool }}</span>{% endif %}
+    </div>
+    <h3 class="contribution-title">{{ c.title }}</h3>
+    <div class="contribution-card-bottom">
+      <span class="stars-display">{{ '★' * (c.avg_stars|round|int) }}{{ '☆' * (5 - (c.avg_stars|round|int)) }}</span>
+      <span class="field-hint-small">{{ '%.1f'|format(c.avg_stars) }} ({{ c.rating_count }} rating{{ '' if c.rating_count == 1 else 's' }})</span>
+    </div>
+  </a>
+  {% else %}
+  <div class="empty-state"><p>You haven't shared anything yet - <a href="{{ url_for('submit') }}">post your first prompt or tip</a>.</p></div>
+  {% endfor %}
+</div>
+{% endblock %}

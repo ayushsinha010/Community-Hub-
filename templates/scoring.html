@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}How Scoring Works — AI Hub{% endblock %}
+{% block content %}
+<h1 class="page-title">How Scoring Works</h1>
+<p class="form-subheading">Every point you earn comes from one of these, and they all stack - post often, get rated well, and keep it up over time.</p>
+
+<table class="scoring-table">
+  <thead>
+    <tr><th>Action</th><th>Points</th><th>Details</th></tr>
+  </thead>
+  <tbody>
+    {% for r in rules %}
+    <tr>
+      <td>{{ r.rule }}</td>
+      <td class="scoring-points">{{ r.points }}</td>
+      <td class="field-hint-small">{{ r.note }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p class="field-hint-small" style="margin-top: 16px;">The monthly leaderboard resets every calendar month, but your all-time score (shown on your profile) never does - and an old post that gets freshly rated still earns you points in whatever month that rating happens.</p>
+{% endblock %}

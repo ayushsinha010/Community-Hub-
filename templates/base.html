@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AI Hub{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{{ 'has-nav' if current_user else 'no-nav' }}">
+  {% if current_user %}
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="{{ url_for('home') }}" class="topbar-brand">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="AI Hub" class="topbar-logo">
+        <span>AI Hub</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="{{ url_for('prompt_library') }}" class="{{ 'topbar-nav-active' if request.endpoint == 'prompt_library' else '' }}">Prompt Library</a>
+        <a href="{{ url_for('tip_library') }}" class="{{ 'topbar-nav-active' if request.endpoint == 'tip_library' else '' }}">Tip/Suggestion Library</a>
+        <a href="{{ url_for('scoring_info') }}" class="{{ 'topbar-nav-active' if request.endpoint == 'scoring_info' else '' }}">Score Calculation</a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('new_digest') }}" class="{{ 'topbar-nav-active' if request.endpoint == 'new_digest' else '' }}">Post Digest</a>
+        {% endif %}
+      </nav>
+    </div>
+    <div class="topbar-right">
+      {% if current_user_rank %}
+      <span class="rank-pill">#{{ current_user_rank }}</span>
+      {% endif %}
+      <span class="your-score-pill">Your score: <strong>{{ current_user_score }} pts</strong></span>
+      <span class="topbar-welcome">Welcome, {{ current_user.display_name }}</span>
+      <a href="{{ url_for('me') }}" class="topbar-avatar" title="{{ current_user.display_name }}">{{ current_user.display_name[0]|upper }}</a>
+      <a href="{{ url_for('logout') }}" class="topbar-logout" title="Log out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </a>
+    </div>
+  </header>
+  {% endif %}
+  <main class="app-main-full">
+    {% block content %}{% endblock %}
+  </main>
+  <div id="spark-layer"></div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — AI Hub{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ page_title }}</h1>
+
+<div class="mini-card-list">
+  {% for c in contributions %}
+  <a href="{{ url_for('contribution_detail', contribution_id=c.id) }}" class="mini-card">
+    <span class="author-avatar">{{ c.author_name[0]|upper }}</span>
+    <div class="mini-card-body">
+      <h4>{{ c.title }}</h4>
+      <span class="field-hint-small">{{ c.author_name }} &middot; {{ c.author_department or company_name }}</span>
+    </div>
+    <div class="mini-card-meta">
+      <span class="stars-display stars-display-sm">{{ '★' * (c.avg_stars|round|int) }}{{ '☆' * (5 - (c.avg_stars|round|int)) }}</span>
+      <span class="field-hint-small">{{ '%.1f'|format(c.avg_stars) }} ({{ c.rating_count }})</span>
+    </div>
+  </a>
+  {% else %}
+  <div class="empty-state"><p>Nothing here yet. <a href="{{ url_for('submit') }}">Share the first one.</a></p></div>
+  {% endfor %}
+</div>
+{% endblock %}

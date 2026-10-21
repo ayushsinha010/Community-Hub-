@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Edit — AI Hub{% endblock %}
+{% block content %}
+<div class="form-screen">
+  <div class="form-card">
+    <h1>Edit contribution</h1>
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <label class="field-label" for="title">Title</label>
+      <input type="text" id="title" name="title" value="{{ contribution.title }}" required>
+
+      <label class="field-label" for="body">Prompt text / tip description</label>
+      <textarea id="body" name="body" rows="8" required>{{ contribution.body }}</textarea>
+
+      <div class="date-fields-row">
+        <div>
+          <label class="field-label" for="tool">Tool (optional)</label>
+          <input type="text" id="tool" name="tool" list="tool-list" value="{{ contribution.tool or '' }}">
+          <datalist id="tool-list">
+            {% for t in tools %}<option value="{{ t }}">{% endfor %}
+          </datalist>
+        </div>
+        <div>
+          <label class="field-label" for="category">Category (optional)</label>
+          <input type="text" id="category" name="category" list="category-list" value="{{ contribution.category or '' }}">
+          <datalist id="category-list">
+            {% for c in categories %}<option value="{{ c }}">{% endfor %}
+          </datalist>
+        </div>
+      </div>
+
+      <div class="wizard-actions">
+        <a href="{{ url_for('contribution_detail', contribution_id=contribution.id) }}" class="btn btn-link">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

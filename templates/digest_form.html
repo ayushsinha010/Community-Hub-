@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Post a Digest — AI Hub{% endblock %}
+{% block content %}
+<div class="form-screen">
+  <div class="form-card">
+    <h1>Post a Digest</h1>
+    <p class="form-subheading">Admin-only. This appears as a flashing card above Latest Updates for everyone on the Hub.</p>
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <label class="field-label" for="title">Title</label>
+      <input type="text" id="title" name="title" value="{{ form.get('title', '') }}" placeholder="e.g. This Week in AI Adoption" required>
+
+      <label class="field-label" for="body">Body</label>
+      <textarea id="body" name="body" rows="6" placeholder="A short update for the whole team..." required>{{ form.get('body', '') }}</textarea>
+
+      <button type="submit" class="btn btn-primary btn-block">Post Digest</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

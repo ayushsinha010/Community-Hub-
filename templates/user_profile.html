@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.user.display_name }} — AI Hub{% endblock %}
+{% block content %}
+<a href="{{ url_for('home') }}" class="back-link">&larr; Back to browse</a>
+
+<div class="profile-header">
+  <span class="author-avatar author-avatar-xl">{{ profile.user.display_name[0]|upper }}</span>
+  <div>
+    <h1>{{ profile.user.display_name }}</h1>
+    <p class="field-hint-small">{{ profile.user.department or company_name }}{% if profile.rank_this_month %} &middot; #{{ profile.rank_this_month }} this month{% endif %}</p>
+    {% if profile.badges %}
+    <div class="badge-row">
+      {% for b in profile.badges %}
+      <span class="badge-pill" title="{{ b.label }}">{{ b.icon }} {{ b.label }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="spotlight-stats profile-stats">
+  <div><strong>{{ profile.all_time_points }}</strong><span>all-time points</span></div>
+  <div><strong>{{ profile.month_points }}</strong><span>points this month</span></div>
+  <div><strong>{{ profile.post_count }}</strong><span>contributions</span></div>
+</div>
+
+<h3>Contributions</h3>
+<div class="contribution-list">
+  {% for c in profile.contributions %}
+  <a href="{{ url_for('contribution_detail', contribution_id=c.id) }}" class="contribution-card">
+    <div class="contribution-card-top">
+      <span class="type-badge type-badge-{{ c.contribution_type }}">{{ contribution_types[c.contribution_type] }}</span>
+    </div>
+    <h3 class="contribution-title">{{ c.title }}</h3>
+    <div class="contribution-card-bottom">
+      <span class="stars-display">{{ '★' * (c.avg_stars|round|int) }}{{ '☆' * (5 - (c.avg_stars|round|int)) }}</span>
+      <span class="field-hint-small">{{ '%.1f'|format(c.avg_stars) }} ({{ c.rating_count }} rating{{ '' if c.rating_count == 1 else 's' }})</span>
+    </div>
+  </a>
+  {% else %}
+  <div class="empty-state"><p>No contributions yet.</p></div>
+  {% endfor %}
+</div>
+{% endblock %}

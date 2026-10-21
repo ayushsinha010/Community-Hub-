@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Share a Prompt/Tip — AI Hub{% endblock %}
+{% block content %}
+<div class="form-screen">
+  <div class="form-card">
+    <h1>Share a prompt or tip</h1>
+    <p class="form-subheading">Found something that saves you real time? Share it - you'll get points right away for posting, and more every time someone rates it useful.</p>
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+    <form method="post" id="submit-form">
+      <label class="field-label">What are you sharing?</label>
+      <div class="type-toggle">
+        <label class="type-toggle-option">
+          <input type="radio" name="contribution_type" value="ai_prompt" data-kind="standard" {{ 'checked' if (form.get('contribution_type') or initial_type or 'ai_prompt') == 'ai_prompt' else '' }}>
+          <span>An AI prompt</span>
+        </label>
+        <label class="type-toggle-option">
+          <input type="radio" name="contribution_type" value="productivity_tip" data-kind="standard" {{ 'checked' if (form.get('contribution_type') or initial_type) == 'productivity_tip' else '' }}>
+          <span>A productivity tip / shortcut</span>
+        </label>
+        <label class="type-toggle-option">
+          <input type="radio" name="contribution_type" value="poll" data-kind="poll" {{ 'checked' if (form.get('contribution_type') or initial_type) == 'poll' else '' }}>
+          <span>A poll</span>
+        </label>
+      </div>
+
+      <label class="field-label" for="title" id="title-label">Title</label>
+      <input type="text" id="title" name="title" value="{{ form.get('title', '') }}" placeholder="e.g. Summarize a long email thread in one prompt" required>
+
+      <div id="standard-fields">
+        <label class="field-label" for="body">Prompt text / tip description</label>
+        <textarea id="body" name="body" rows="8" placeholder="Paste the exact prompt, or describe the shortcut/trick step by step." required>{{ form.get('body', '') }}</textarea>
+
+        <div class="date-fields-row">
+          <div>
+            <label class="field-label" for="tool">Tool (optional)</label>
+            <input type="text" id="tool" name="tool" list="tool-list" value="{{ form.get('tool', '') }}" placeholder="e.g. Claude Code, Windows, Excel">
+            <datalist id="tool-list">
+              {% for t in tools %}<option value="{{ t }}">{% endfor %}
+            </datalist>
+          </div>
+          <div>
+            <label class="field-label" for="category">Category (optional)</label>
+            <input type="text" id="category" name="category" list="category-list" value="{{ form.get('category', '') }}" placeholder="e.g. Automation, Shortcuts">
+            <datalist id="category-list">
+              {% for c in categories %}<option value="{{ c }}">{% endfor %}
+            </datalist>
+          </div>
+        </div>
+      </div>
+
+      <div id="poll-fields" hidden>
+        <label class="field-label" for="poll-description">Context (optional)</label>
+        <textarea id="poll-description" name="body" rows="2" placeholder="Any extra context for the poll (optional)"></textarea>
+
+        <label class="field-label">Options (2-6)</label>
+        <div id="poll-options-list" class="poll-options-editor">
+          <input type="text" name="option" class="poll-option-input" placeholder="Option 1" maxlength="120">
+          <input type="text" name="option" class="poll-option-input" placeholder="Option 2" maxlength="120">
+        </div>
+        <button type="button" id="poll-add-option" class="btn btn-link btn-small">+ Add option</button>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Post it</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var form = document.getElementById("submit-form");
+  if (!form) return;
+  var standardFields = document.getElementById("standard-fields");
+  var pollFields = document.getElementById("poll-fields");
+  var titleInput = document.getElementById("title");
+  var titleLabel = document.getElementById("title-label");
+  var radios = form.querySelectorAll('input[name="contribution_type"]');
+  var optionsList = document.getElementById("poll-options-list");
+  var addOptionBtn = document.getElementById("poll-add-option");
+
+  // The standard body textarea and the poll's context textarea share
+  // name="body" (only one is ever meant to be posted) - disabling the whole
+  // inactive section, not just hiding it, is what keeps a disabled field out
+  // of the submitted form data and exempt from its own "required" attribute.
+  function setDisabled(container, disabled) {
+    container.querySelectorAll("input, textarea").forEach(function (el) { el.disabled = disabled; });
+  }
+
+  function applyKind(isPoll) {
+    pollFields.hidden = !isPoll;
+    standardFields.hidden = isPoll;
+    setDisabled(pollFields, !isPoll);
+    setDisabled(standardFields, isPoll);
+    titleLabel.textContent = isPoll ? "Poll question" : "Title";
+    titleInput.placeholder = isPoll
+      ? "e.g. Which office snack should we stock more of?"
+      : "e.g. Summarize a long email thread in one prompt";
+  }
+
+  radios.forEach(function (r) {
+    r.addEventListener("change", function () { applyKind(r.dataset.kind === "poll"); });
+  });
+
+  var checked = form.querySelector('input[name="contribution_type"]:checked');
+  applyKind(!!(checked && checked.dataset.kind === "poll"));
+
+  if (addOptionBtn) {
+    addOptionBtn.addEventListener("click", function () {
+      var count = optionsList.querySelectorAll(".poll-option-input").length;
+      if (count >= 6) return;
+      var input = document.createElement("input");
+      input.type = "text";
+      input.name = "option";
+      input.className = "poll-option-input";
+      input.maxLength = 120;
+      input.placeholder = "Option " + (count + 1);
+      optionsList.appendChild(input);
+      if (count + 1 >= 6) addOptionBtn.hidden = true;
+    });
+  }
+})();
+</script>
+{% endblock %}
