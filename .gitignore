@@ -1,0 +1,29 @@
+# Local database (created on first run) and any SQLite side files
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+data/.secret_key
+data/*.sqlite
+data/*.sqlite3
+!data/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and editor/OS files
+*.log
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
